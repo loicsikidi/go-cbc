@@ -67,7 +67,7 @@ func main() {
 		}
 		token, err := jwt.ParseWithClaims(
 			cookie.Value,
-			&user{},
+			&userSession{},
 			func(token *jwt.Token) (any, error) {
 				return []byte(jwtSigner), nil
 			},

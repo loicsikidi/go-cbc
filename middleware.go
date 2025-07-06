@@ -1,4 +1,4 @@
-package gocbc
+package cbc
 
 import (
 	"net/http"
