@@ -28,37 +28,39 @@ Yes, if:
 ```go
 package main
 
-import(
+import (
+	"crypto/tls"
+	"log"
 	"net/http"
-    "log"
+	"time"
 
-    "github.com/golang-jwt/jwt/v5"
-    "github.com/loicsikidi/go-cbc"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/loicsikidi/go-cbc"
 )
 
 const (
-    jwtSigner = "your-secret"
-    cookieName = "amazing-session-cookie"
+	jwtSigner  = "your-secret"
+	cookieName = "amazing-session-cookie"
 )
 
 // session object
 type userSession struct {
-    jwt.RegisteredClaims
-    cbc.ConfirmationClaim // MANDATORY: this struct is used to store the certificate binding information
-	Username    string   `json:"username"`
-	Permissions []string `json:"permissions"`
+	jwt.RegisteredClaims
+	cbc.ConfirmationClaim          // MANDATORY: this struct is used to store the certificate binding information
+	Username              string   `json:"username"`
+	Permissions           []string `json:"permissions"`
 }
 
 func main() {
-    mux := http.NewServeMux()
-    mux.HandleFunc("/login", loginHandler)
-    mux.HandleFunc("/protected", protectedHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/login", loginHandler)
+	mux.HandleFunc("/protected", protectedHandler)
 
-    // MANDATORY: create the Certificate Bound Cookie middleware
-    // The middleware will automatically check that the session cookie is bound to the TLS client certificate
-    handler := cbc.CertificateBoundCookieMiddleware(func(r *http.Request) (cbc.CertificateBoundClaims, error) {
-        // NOTE: via this callback, you have the responsability to return the session claims
-        // which can be stored outside of the cookie (eg., in a database, cache, etc.)
+	// MANDATORY: create the Certificate Bound Cookie middleware
+	// The middleware will automatically check that the session cookie is bound to the TLS client certificate
+	handler := cbc.CertificateBoundCookieMiddleware(func(r *http.Request) (cbc.CertificateBoundClaims, error) {
+		// NOTE: via this callback, you have the responsability to return the session claims
+		// which can be stored outside of the cookie (eg., in a database, cache, etc.)
 		cookie, err := r.Cookie(cookieName)
 		if err != nil {
 			return nil, err
@@ -76,28 +78,28 @@ func main() {
 		return token.Claims.(*userSession), nil
 	}, cbc.WithSkipPaths([]string{"/login"}))(mux)
 
-    server := &http.Server{
-        Addr:         ":8443",
-        Handler:      handler,
-        TLSConfig:    &tls.Config{
-            ClientAuth: tls.RequireAndVerifyClientCert, // MANDATORY: enforce mTLS
-        },
-    }
-    
-    if err := server.ListenAndServeTLS("cert.pem", "key.pem"); err != nil && err != http.ErrServerClosed {
-        log.Fatal("Server failed to start: ", err)
-    } else {
-        log.Println("Server started on https://localhost:8443")
-    }
+	server := &http.Server{
+		Addr:    ":8443",
+		Handler: handler,
+		TLSConfig: &tls.Config{
+			ClientAuth: tls.RequireAndVerifyClientCert, // MANDATORY: enforce mTLS
+		},
+	}
+
+	if err := server.ListenAndServeTLS("cert.pem", "key.pem"); err != nil && err != http.ErrServerClosed {
+		log.Fatal("Server failed to start: ", err)
+	} else {
+		log.Println("Server started on https://localhost:8443")
+	}
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-    // login process
-    // ...
-    currentUser := &userSession{
+	// login process
+	// ...
+	currentUser := &userSession{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:  "trusted-idp",
-			Subject: "uuid",
+			Issuer:    "trusted-idp",
+			Subject:   "uuid",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -106,31 +108,31 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		Permissions: []string{"read", "write"},
 	}
 
-    // MANDATORY: bind the session to the TLS client certificate
-    claims, err := cbc.Create(cbc.GetCertificateFromRequest(r), currentUser)
-    if err != nil {
-        http.Error(w, "Failed to create session", http.StatusInternalServerError)
-        return
-    }
+	// MANDATORY: bind the session to the TLS client certificate
+	claims, err := cbc.Create(cbc.GetCertificateFromRequest(r), currentUser)
+	if err != nil {
+		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
 
-    cookie := &http.Cookie{
-        Name:     cookieName,
-        // NOTE: you can store the JWT in a database or cache instead of a cookie and use the cookie only as a reference
-        Value:    createJWT(claims, []byte(jwtSigner)),
-        Path:     "/",
-        Secure:   true,
-        HttpOnly: true,
-        SameSite: http.SameSiteStrictMode,
-        MaxAge:   3600, // 1 hour
-    }
-    http.SetCookie(w, cookie)
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Login successful"))
+	cookie := &http.Cookie{
+		Name: cookieName,
+		// NOTE: you can store the JWT in a database or cache instead of a cookie and use the cookie only as a reference
+		Value:    createJWT(claims, []byte(jwtSigner)),
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   3600, // 1 hour
+	}
+	http.SetCookie(w, cookie)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Login successful"))
 }
 
 func protectedHandler(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("ok"))
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
 }
 ```
 

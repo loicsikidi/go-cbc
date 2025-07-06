@@ -112,6 +112,12 @@ func setupExampleServer(t *testing.T) *httptest.Server {
 					return jwtSigner, nil
 				},
 			)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Invalid cookie"))
+				return
+			}
+
 			if err := Verify(r.TLS.PeerCertificates[0], token.Claims.(*user)); err != nil {
 				w.WriteHeader(http.StatusForbidden)
 				w.Write([]byte("stolen cookie"))

@@ -7,11 +7,14 @@ let
     config = { };
     overlays = [ ];
   };
-  pre-commit-check = pkgs.callPackage ./nix/pre-commit.nix { };
+  pre-commit = import ./default.nix { };
 in pkgs.mkShellNoCC {
   packages = with pkgs; [
     go # v1.24.0
     delve # v1.25.0
   ];
-  buildInputs = pre-commit-check.enabledPackages;
+  shellHook = ''
+    ${pre-commit.pre-commit-check.shellHook}
+  '';
+  buildInputs = pre-commit.pre-commit-check.enabledPackages;
 }

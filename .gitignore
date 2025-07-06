@@ -33,3 +33,9 @@ go.work.sum
 
 # direnv state directory
 .direnv/
+
+# nixhook
+.pre-commit-config.yaml
+
+# nix
+result
