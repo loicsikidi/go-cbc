@@ -46,7 +46,9 @@ const (
 // session object
 type userSession struct {
 	jwt.RegisteredClaims
-	cbc.ConfirmationClaim          // MANDATORY: this struct is used to store the certificate binding information
+	// MANDATORY: your session object must include "cbc.ConfirmationClaim" struct in order to get
+	// certificate binding information automatically added to the JWT
+	cbc.ConfirmationClaim
 	Username              string   `json:"username"`
 	Permissions           []string `json:"permissions"`
 }
@@ -57,10 +59,11 @@ func main() {
 	mux.HandleFunc("/protected", protectedHandler)
 
 	// MANDATORY: create the Certificate Bound Cookie middleware
-	// The middleware will automatically check that the session cookie is bound to the TLS client certificate
+	// The middleware will automatically check if the session cookie is bound to the TLS client certificate
+	// and will reject the request if the binding is not valid.
 	handler := cbc.CertificateBoundCookieMiddleware(func(r *http.Request) (cbc.CertificateBoundClaims, error) {
 		// NOTE: via this callback, you have the responsability to return the session claims
-		// which can be stored outside of the cookie (eg., in a database, cache, etc.)
+		// which can be stored inside or outside of the cookie (eg., in a database, cache, etc.).
 		cookie, err := r.Cookie(cookieName)
 		if err != nil {
 			return nil, err
@@ -76,7 +79,9 @@ func main() {
 			return nil, err
 		}
 		return token.Claims.(*userSession), nil
-	}, cbc.WithSkipPaths([]string{"/login"}))(mux)
+	}, 
+		cbc.WithSkipPaths([]string{"/login"}), // we disable CBC for the login path
+	)(mux) 
 
 	server := &http.Server{
 		Addr:    ":8443",
@@ -94,8 +99,7 @@ func main() {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	// login process
-	// ...
+	// login process ...
 	currentUser := &userSession{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "trusted-idp",
