@@ -142,7 +142,7 @@ func protectedHandler(w http.ResponseWriter, r *http.Request) {
 
 ### How the magic works 🪄?
 
-As described in the [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705.html), we are able to link the JWT with the TLS client certificate by adding a `confirmation` claim. This claim contains the SHA-256 hash of the TLS client certificate, which is used to verify afterware the binding.
+As described in the [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705.html), we are able to link the JWT with the TLS client certificate by adding a `confirmation` claim. This claim contains the SHA-256 hash of the TLS client certificate, which is used to verify the binding afterward.
 
 ```jsonc
 {
