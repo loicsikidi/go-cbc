@@ -7,14 +7,14 @@
 
 ## Motivation
 
-Certificate-Bound Cookie is strategy (there are others) to address [*cookie thief*](https://cheatsheetseries.owasp.org/cheatsheets/Cookie_Theft_Mitigation_Cheat_Sheet.html) attacks. Today, we're in a rather paradoxical situation where on one hand the login process is more and more robust (eg., 2FA, WebAuthn, etc.), and even if an attacker steals only the password, he/she can't do much with it. On the other hand, if the attacker can steal a valid session cookie instead, it is possible to hijack the user session for the duration of the session lifetime period.
+Certificate-Bound Cookie is a strategy (there are others) to address [*cookie thief*](https://cheatsheetseries.owasp.org/cheatsheets/Cookie_Theft_Mitigation_Cheat_Sheet.html) attacks. Today, we're in a rather paradoxical situation where on one hand the login process is more and more robust (eg., 2FA, WebAuthn, etc.), and even if an attacker steals only the password, he/she can't do much with it. On the other hand, if the attacker can steal a valid session cookie instead, it is possible to hijack the user session for the duration of the session lifetime period.
 
 In a nutshell, session cookies are the weakest point and should be protected as much as possible.
 
 This library is inspired by [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705.html) (*OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens*) which describes how to tie an access token to a TLS client certificate. The idea is to use the same concept but for session cookies!
 
 > [!NOTE]  
-> Once upon a time, there was a protocol called [Token binding (RFC 8473)](https://datatracker.ietf.org/doc/html/rfc8473) which was designed to bind a token (eg., OAuth token, http cookie) to a TLS connection. Unfortunately, it was never widely adopted by major web browsers and is now in brain death - which explains why we implement this logc at the application-level.
+> Once upon a time, there was a protocol called [Token binding (RFC 8473)](https://datatracker.ietf.org/doc/html/rfc8473) which was designed to bind a token (eg., OAuth token, http cookie) to a TLS connection. Unfortunately, it was never widely adopted by major web browsers and is now in brain death - which explains why we implement this logic at the application-level.
 
 ## Does this library is for you?
 
