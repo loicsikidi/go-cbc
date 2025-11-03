@@ -166,3 +166,11 @@ If you want to contribute to this project, feel free to open an issue or a pull 
 |---------|-------------|
 | [Device Bound Session Credentials](https://w3c.github.io/webappsec-dbsc/) (DBSC) | The spec (which is still a draft at time of writing) is available in the *W3C* but it's currently ONLY implemented in Chrome. |
 | [OWASP Cookie Theft Mitigation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cookie_Theft_Mitigation_Cheat_Sheet.html) | The document is mainly focus on *cookie theft detection*  |
+
+## License
+
+BSD-3-Clause License. See the [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+
+This is my personal project and it does not represent my employer. While I do my best to ensure that everything works, I take no responsibility for issues caused by this code.
