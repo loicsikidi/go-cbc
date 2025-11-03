@@ -14,9 +14,17 @@ in
     packages = with pkgs; [
       go # v1.24.0
       delve # v1.25.0
+
+      # Required to run tests with -race flag
+      gcc # 14.3.0
     ];
     shellHook = ''
       ${pre-commit.shellHook}
     '';
     buildInputs = pre-commit.enabledPackages;
+
+    env = {
+      # Required to run tests with -race flag
+      CGO_ENABLED = "1";
+    };
   }
